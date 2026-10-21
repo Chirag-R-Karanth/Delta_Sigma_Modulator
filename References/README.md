@@ -1,0 +1,1 @@
+This file contains all the references and study materials required for the main project. Also contains some notes regarding the subject and the workflow pattern we will be following to get this project done.
