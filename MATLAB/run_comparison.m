@@ -102,9 +102,9 @@ bw = cfg.fs/(2*cfg.osr);
 metricsA = inband_metrics(a.output, tone, cfg.fs, bw, cfg.toneBin, cfg.N);
 metricsB = inband_metrics(b.output, tone, cfg.fs, bw, cfg.toneBin, cfg.N);
 fprintf('\nSINUSOID RESULTS (OSR=%d, in-band edge %.6g fs)\n',cfg.osr,bw/cfg.fs);
-fprintf('MASH 1-1:   mean error=%+.4e, in-band error power=%.4e, SNR=%.2f dB\n', ...
+fprintf('MASH 1-1:   mean error=%+.4e, tone-excluded in-band noise power=%.4e, SNR=%.2f dB\n', ...
     mean(a.error), metricsA.noisePower, metricsA.snrDb);
-fprintf('MASH 1-1-1: mean error=%+.4e, in-band error power=%.4e, SNR=%.2f dB\n', ...
+fprintf('MASH 1-1-1: mean error=%+.4e, tone-excluded in-band noise power=%.4e, SNR=%.2f dB\n', ...
     mean(b.error), metricsB.noisePower, metricsB.snrDb);
 row = row + 1;
 summary(row,:) = {'Sinusoid',mean(a.output),mean(b.output),mean(a.error),mean(b.error), ...
@@ -133,7 +133,7 @@ axis equal; grid on; xlabel('Real'); ylabel('Imaginary');
 title('NTF zeros (all at z=1)'); legend('MASH 1-1','MASH 1-1-1','Unit circle');
 saveas(gcf,fullfile(outDir,'ntf_zeros.png'));
 
-%% 4) OSR sweep: integrate error PSD inside each signal band
+%% 4) OSR sweep: integrate output noise bins inside each signal band
 osrList = [8 16 32 64 128];
 noise2 = zeros(size(osrList)); noise3 = noise2;
 for k = 1:numel(osrList)
@@ -143,18 +143,18 @@ for k = 1:numel(osrList)
     noise2(k) = m2.noisePower;
     noise3(k) = m3.noisePower;
 end
-figure('Name','In-band error power vs OSR');
+figure('Name','In-band noise power vs OSR');
 loglog(osrList,noise2,'o-','LineWidth',1.5); hold on;
 loglog(osrList,noise3,'s-','LineWidth',1.5); grid on;
-xlabel('Oversampling ratio'); ylabel('Integrated in-band error power');
-title('In-band error power vs OSR (same simulated records)');
+xlabel('Oversampling ratio'); ylabel('Integrated tone-excluded in-band noise power');
+title('In-band noise power vs OSR (same simulated records)');
 legend('MASH 1-1','MASH 1-1-1','Location','best');
 saveas(gcf,fullfile(outDir,'inband_noise_vs_osr.png'));
 
 %% 5) Export summary
 T = cell2table(summary,'VariableNames',{'Test','MeanOutput_MASH11','MeanOutput_MASH111', ...
-    'MeanError_MASH11','MeanError_MASH111','InbandErrorPower_MASH11', ...
-    'InbandErrorPower_MASH111','SNR_dB_MASH11','SNR_dB_MASH111'});
+    'MeanError_MASH11','MeanError_MASH111','InbandNoisePower_MASH11', ...
+    'InbandNoisePower_MASH111','SNR_dB_MASH11','SNR_dB_MASH111'});
 writetable(T,fullfile(outDir,'summary.csv'));
 disp(T);
 fprintf('\nAnalysis complete. Figures and summary saved in: %s\n',outDir);
